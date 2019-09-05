@@ -1,11 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 
-import * as child from "child_process";
-import * as path from "path";
+import * as child from 'child_process';
+import * as path from 'path';
 
-const outputChannel = vscode.window.createOutputChannel("Automajick");
+const outputChannel = vscode.window.createOutputChannel('Automajick');
 
 type command = {
   [label: string]: string;
@@ -25,95 +25,92 @@ export function activate(context: vscode.ExtensionContext) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand(
-    "automajick.run",
-    () => {
-      // The code you place here will be executed every time your command is executed
+  let disposable = vscode.commands.registerCommand('automajick.run', () => {
+    // The code you place here will be executed every time your command is executed
 
-      const commands: [command] | null =
-        vscode.workspace.getConfiguration("automajick").get("commands") || null;
+    const commands: [command] | null =
+      vscode.workspace.getConfiguration('automajick').get('commands') || null;
 
-      if (commands === null) {
-        vscode.window.showInformationMessage("You have no scripts configured!");
+    if (commands === null) {
+      vscode.window.showInformationMessage('You have no scripts configured!');
+      return;
+    }
+
+    // yes, we can one day make a QuickPickCommandItem
+    let items: Array<vscode.QuickPickItem> = [];
+
+    for (const key in commands) {
+      items.push({
+        label: commands[key].label,
+        description: commands[key].location,
+      });
+    }
+
+    vscode.window.showQuickPick(items).then(selection => {
+      if (selection === undefined) {
+        // cancelled command, be quiet
         return;
       }
 
-			// yes, we can one day make a QuickPickCommandItem
-      let items: Array<vscode.QuickPickItem> = [];
+      let script: string | undefined = selection.description;
+      let interp: string | undefined = vscode.workspace
+        .getConfiguration('automajick')
+        .get('interpreter');
 
-      for (const key in commands) {
-        items.push({
-          label: commands[key].label,
-          description: commands[key].location
-        });
+      if (interp === undefined || script === undefined) {
+        vscode.window.showInformationMessage(
+          'Things are undefined, check your options!'
+        );
+        return;
       }
 
-      vscode.window.showQuickPick(items).then(selection => {
-        if (selection === undefined) {
-          // cancelled command, be quiet
-          return;
+      const editor = vscode.window.activeTextEditor;
+      if (editor === undefined) {
+        vscode.window.showInformationMessage('No File opened!');
+        return;
+      }
+
+      let p: any = undefined;
+
+      if (process.platform === 'win32') {
+        p = path.win32;
+      } else {
+        p = path.posix;
+      }
+
+      const observedFile = p.normalize(editor.document.fileName);
+
+      let workingDirectory = p.dirname(observedFile);
+
+      if (vscode.workspace.workspaceFolders !== undefined) {
+        workingDirectory = p.normalize(
+          vscode.workspace.workspaceFolders[0].uri.fsPath
+        );
+      }
+
+      /* run the interpreter on script given the currentfile in filepath */
+      const target = `${interp} "${script}" "${observedFile}"`;
+
+      let proc = child.exec(target, { cwd: workingDirectory }, function(
+        error,
+        stdout,
+        stderr
+      ) {
+        if (stdout !== null) {
+          outputChannel.append(`${stdout.toString()}\n`);
         }
 
-        let script: string | undefined = selection.description;
-        let interp: string | undefined = vscode.workspace
-          .getConfiguration("automajick")
-          .get("interpreter");
-
-        if (interp === undefined || script === undefined) {
-          vscode.window.showInformationMessage(
-            "Things are undefined, check your options!"
-          );
-          return;
+        if (stderr !== null && stderr !== '') {
+          let e = stderr.toString();
+          outputChannel.append(`err: ${e}`);
+          vscode.window.showErrorMessage(e);
+        } else if (error !== null) {
+          outputChannel.append(`procERR: ${error}`);
+          vscode.window.showErrorMessage(`${error}`);
         }
-
-        const editor = vscode.window.activeTextEditor;
-        if (editor === undefined) {
-          vscode.window.showInformationMessage("No File opened!");
-          return;
-        }
-
-				let p:any = undefined;
-
-        if (process.platform === "win32") {
-          p = path.win32;
-        } else {
-          p = path.posix;
-				}
-
-				const observedFile = p.normalize(editor.document.fileName);
-
-				let workingDirectory = p.dirname(observedFile);
-
-				if (vscode.workspace.workspaceFolders !== undefined){
-						workingDirectory = p.normalize(vscode.workspace.workspaceFolders[0].uri.fsPath);
-				}
-
-				/* run the interpreter on script given the currentfile in filepath */
-				const target = `${interp} "${script}" "${observedFile}"`;
-
-        let proc = child.exec(target, { cwd: workingDirectory }, function(
-          error,
-          stdout,
-          stderr
-        ) {
-
-          if (stdout !== null) {
-						outputChannel.append(`${stdout.toString()}\n`);
-					}
-
-          if (stderr !== null && stderr !== "") {
-            let e = stderr.toString();
-            outputChannel.append(`err: ${e}`);
-						vscode.window.showErrorMessage(e);
-
-          } else if (error !== null) {
-            outputChannel.append(`procERR: ${error}`);
-            vscode.window.showErrorMessage(`${error}`);
-          }
-        });
       });
-    }
-  );
+    });
+  });
 
   context.subscriptions.push(disposable);
 }
