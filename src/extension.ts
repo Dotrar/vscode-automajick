@@ -1,11 +1,10 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
-import * as child from 'child_process';
-import * as path from 'path';
+import * as path from "path";
 
-const outputChannel = vscode.window.createOutputChannel('Automajick');
+//const outputChannel = vscode.window.createOutputChannel('Automajick');
 
 type command = {
   [label: string]: string;
@@ -18,21 +17,19 @@ type command = {
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  console.log(
-    'Congratulations, your extension "vscode-automajick" is now active!'
-  );
 
+  const autoTerminal = vscode.window.createTerminal("Automajick");
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
   // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand('automajick.run', () => {
+  let disposable = vscode.commands.registerCommand("automajick.run", () => {
     // The code you place here will be executed every time your command is executed
 
     const commands: [command] | null =
-      vscode.workspace.getConfiguration('automajick').get('commands') || null;
+      vscode.workspace.getConfiguration("automajick").get("commands") || null;
 
     if (commands === null) {
-      vscode.window.showInformationMessage('You have no scripts configured!');
+      vscode.window.showInformationMessage("You have no scripts configured!");
       return;
     }
 
@@ -42,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     for (const key in commands) {
       items.push({
         label: commands[key].label,
-        description: commands[key].location,
+        description: commands[key].location
       });
     }
 
@@ -54,43 +51,60 @@ export function activate(context: vscode.ExtensionContext) {
 
       let script: string | undefined = selection.description;
       let interp: string | undefined = vscode.workspace
-        .getConfiguration('automajick')
-        .get('interpreter');
+        .getConfiguration("automajick")
+        .get("interpreter");
 
       if (interp === undefined || script === undefined) {
         vscode.window.showInformationMessage(
-          'Things are undefined, check your options!'
+          "Things are undefined, check your options!"
         );
         return;
       }
 
       const editor = vscode.window.activeTextEditor;
+
       if (editor === undefined) {
-        vscode.window.showInformationMessage('No File opened!');
+        vscode.window.showErrorMessage("No File opened!");
         return;
       }
 
-      let p: any = undefined;
+      let p = path.posix;
+      let clear = "clear";
 
-      if (process.platform === 'win32') {
+      if (process.platform === "win32") {
         p = path.win32;
-      } else {
-        p = path.posix;
+        clear = "cls";
       }
 
       const observedFile = p.normalize(editor.document.fileName);
 
-      let workingDirectory = p.dirname(observedFile);
+      let workingDirectory: string | null = null; 
 
+      if (vscode.workspace.workspaceFolders === undefined) {
+        workingDirectory = p.dirname(observedFile);
+      }
+      /*
       if (vscode.workspace.workspaceFolders !== undefined) {
         workingDirectory = p.normalize(
           vscode.workspace.workspaceFolders[0].uri.fsPath
         );
       }
+      */
 
       /* run the interpreter on script given the currentfile in filepath */
-      const target = `${interp} "${script}" "${observedFile}"`;
+      const target = `${clear}\n ${interp} "${script}" "${observedFile}"`;
 
+      /* First up, clear the channel, then start */
+
+      if(workingDirectory !== null) {
+        autoTerminal.sendText(`cd "${workingDirectory}"\n`);
+      }
+
+      autoTerminal.sendText(target);
+      autoTerminal.show(false);
+      /*
+      outputChannel.clear();
+      outputChannel.show(true);
       let proc = child.exec(target, { cwd: workingDirectory }, function(
         error,
         stdout,
@@ -109,6 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
           vscode.window.showErrorMessage(`${error}`);
         }
       });
+      */
     });
   });
 

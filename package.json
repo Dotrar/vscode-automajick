@@ -24,9 +24,14 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "keybindings":[
+      {
+        "command": "automajick.run",
+        "key": "Control+F1"
+      }
+    ],
     "configuration": {
       "title": "Automajick",
-      "description": "Is this thing on?",
       "properties": {
         "automajick.interpreter": {
           "type": "string",
@@ -48,7 +53,7 @@
     "commands": [
       {
         "command": "automajick.run",
-        "title": "Automajick Run script"
+        "title": "Automajick Run"
       }
     ]
   },
