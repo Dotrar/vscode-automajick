@@ -5,13 +5,21 @@ Run scripts on your work simply and automajickly
 ## Features
 
 - Use whatever language you want
-- Run scripts from anywhere; in the current workspace and with the current file as the first param
+- Run scripts from anywhere; in the current workspace and with the current file, using stdio and argv
 - Quick and easy
 
-## What would this be used for?
+## What is the use of this?
 
-Generally I work on many different projects and have different python scripts to manage github repos, readme conversions, auto-zippers, and etc.
-This script allows someone like me to run the chosen python scripts at the push of a button.
+Use cases could include:
+
+- Converting one file format to the next
+- Extracting data from one source to apply to another
+- Managing folder-level tasks, git repos, custom sanity checks
+- Compile and build scripts, setup scripts, etc
+
+Generally, at my workplace I manage many different projects and folders for different things; I mainly use python scripts to automate many tasks across folders and on files; for instance: using a python script to convert md to html, extracting data, zip'ing, managing github when required, etc.
+
+This extension allows those scripts to be written in a generic way, and activated with few button presses.
 
 ## Requirements
 
@@ -19,7 +27,7 @@ None, but you will need scripts that you want to run, and a `interpreter` to run
 
 ## Extension Settings
 
-- `automajick.interpreter`: The command for invoking the interpreter
+- `automajick.interpreter`: The command line for invoking the interpreter
 - `automajick.commands`: A list of command objects with the following properties:
 
 ```json
@@ -29,18 +37,18 @@ None, but you will need scripts that you want to run, and a `interpreter` to run
 }
 ```
 
-Each script/command will be run in the form of:
+Then with the `<Ctrl><F1>` Keypress, you will get a quick-select popup of *labels* configured to run the command in the form of:
 
 ```sh
-{interpreter} "{current_observed_file}"
+{interpreter} "{chosen.location}" "{current_observed_file}"
 ```
 
-Local to the current workspace folder or the directory of the file.
+Local to either the current workspace folder or the directory of the file.
 
 Where:
 
 - `current_observed_file` : Is the current file you have opened on the editor.
-- `command.location` : is the location tag of the command you have selected.
+- `chosen.location` : is the location tag of the command you have selected.
 - **cwd** is set to the *workspace* folder; or if that is not open, the folder of `current_observed_file`
 
 ## Release Notes

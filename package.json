@@ -1,15 +1,15 @@
 {
   "name": "vscode-automajick",
   "displayName": "AutoMajick",
-  "description": "Configure and Run any scripts from any workspace auto-majickally",
-  "version": "0.0.1",
+  "description": "Configure and run any scripts from any workspace auto-majickaly",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.37.0"
   },
+  "icon": "images/automajick.png",
   "homepage": "https://github.com/dotrar/vscode-automajick/",
   "bugs": {
-    "url": "https://github.com/dotrar/vscode-automajick/issues",
-    "email": "sir.west.dre@gmail.com"
+    "url": "https://github.com/dotrar/vscode-automajick/issues"
   },
   "publisher": "dotrar",
   "repository": {
@@ -24,7 +24,7 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "keybindings":[
+    "keybindings": [
       {
         "command": "automajick.run",
         "key": "Control+F1"
