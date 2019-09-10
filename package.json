@@ -40,11 +40,22 @@
         },
         "automajick.commands": {
           "type": "array",
-          "description": "Commands and script locations, in a [ { 'label':string, 'location':string }, ... ] type of way",
+          "description": "Majick commands",
           "default": [
             {
               "label": "Hello World",
-              "location": "C:/test.py"
+              "description": "This runs a line of python without disturbing what you were doing",
+              "command": "-c \"import sys; print('hello world', sys.argv)\"",
+              "forget": true
+            },
+            {
+              "label": "Hello File",
+              "description": "This runs a file somewhere",
+              "location": "C:/test/test.py"
+            },
+            {
+              "label": "Hello Null",
+              "description": "This runs nothing"
             }
           ]
         }

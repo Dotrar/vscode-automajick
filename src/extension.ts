@@ -6,59 +6,61 @@ import * as path from "path";
 
 //const outputChannel = vscode.window.createOutputChannel('Automajick');
 
-type command = {
-  [label: string]: string;
+interface QuickPickAutoMajickItems extends vscode.QuickPickItem {
   label: string;
-  location: string;
-};
+  description: string;
+  location?: string;
+  command?: string;
+  forget?: boolean;
+}
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
+  //this was originally outputChannel but terminals are nicer
 
   const autoTerminal = vscode.window.createTerminal("Automajick");
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand("automajick.run", () => {
-    // The code you place here will be executed every time your command is executed
 
-    const commands: [command] | null =
+  let disposable = vscode.commands.registerCommand("automajick.run", () => {
+
+    const commands: [QuickPickAutoMajickItems] | null =
       vscode.workspace.getConfiguration("automajick").get("commands") || null;
 
     if (commands === null) {
-      vscode.window.showInformationMessage("You have no scripts configured!");
+      vscode.window.showErrorMessage(
+        "You have an empty set of AutoMajick Commands!"
+      );
       return;
     }
 
-    // yes, we can one day make a QuickPickCommandItem
-    let items: Array<vscode.QuickPickItem> = [];
-
-    for (const key in commands) {
-      items.push({
-        label: commands[key].label,
-        description: commands[key].location
-      });
-    }
-
-    vscode.window.showQuickPick(items).then(selection => {
+    vscode.window.showQuickPick(commands).then(selection => {
       if (selection === undefined) {
         // cancelled command, be quiet
         return;
       }
 
-      let script: string | undefined = selection.description;
       let interp: string | undefined = vscode.workspace
         .getConfiguration("automajick")
         .get("interpreter");
 
-      if (interp === undefined || script === undefined) {
+      if (interp === undefined) {
         vscode.window.showInformationMessage(
-          "Things are undefined, check your options!"
+          "You have no interpreter selected! check your settings"
         );
         return;
+      }
+
+      let script: string | undefined = selection.command || selection.location;
+
+      if (script === undefined) {
+        vscode.window.showErrorMessage(
+          `Your Majick ${selection.label} has no command nor location`
+        );
+        return;
+      }
+
+      if (script === selection.location) {
+        // wrap in quotes if it is a location, shells will love you for it
+        script = `"${script}"`;
+        // let the interpreter 404 if required; users always know what they are doing :^)
       }
 
       const editor = vscode.window.activeTextEditor;
@@ -72,58 +74,29 @@ export function activate(context: vscode.ExtensionContext) {
       let clear = "clear";
 
       if (process.platform === "win32") {
+        // set windows defined options here
         p = path.win32;
         clear = "cls";
       }
 
       const observedFile = p.normalize(editor.document.fileName);
 
-      let workingDirectory: string | null = null; 
+      let anonymousDirectoryChange: string | null = null;
 
       if (vscode.workspace.workspaceFolders === undefined) {
-        workingDirectory = p.dirname(observedFile);
+        anonymousDirectoryChange = p.dirname(observedFile);
       }
-      /*
-      if (vscode.workspace.workspaceFolders !== undefined) {
-        workingDirectory = p.normalize(
-          vscode.workspace.workspaceFolders[0].uri.fsPath
-        );
-      }
-      */
 
       /* run the interpreter on script given the currentfile in filepath */
-      const target = `${clear}\n ${interp} "${script}" "${observedFile}"`;
+      const target = `${clear}\n ${interp} ${script} "${observedFile}"`;
 
       /* First up, clear the channel, then start */
-
-      if(workingDirectory !== null) {
-        autoTerminal.sendText(`cd "${workingDirectory}"\n`);
+      if (anonymousDirectoryChange !== null) {
+        autoTerminal.sendText(`cd "${anonymousDirectoryChange}"\n`);
       }
 
       autoTerminal.sendText(target);
-      autoTerminal.show(false);
-      /*
-      outputChannel.clear();
-      outputChannel.show(true);
-      let proc = child.exec(target, { cwd: workingDirectory }, function(
-        error,
-        stdout,
-        stderr
-      ) {
-        if (stdout !== null) {
-          outputChannel.append(`${stdout.toString()}\n`);
-        }
-
-        if (stderr !== null && stderr !== '') {
-          let e = stderr.toString();
-          outputChannel.append(`err: ${e}`);
-          vscode.window.showErrorMessage(e);
-        } else if (error !== null) {
-          outputChannel.append(`procERR: ${error}`);
-          vscode.window.showErrorMessage(`${error}`);
-        }
-      });
-      */
+      autoTerminal.show( selection.forget || false);
     });
   });
 
@@ -131,4 +104,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+  // Do we have to do anything here?
+}
