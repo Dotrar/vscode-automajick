@@ -49,7 +49,7 @@ Simply use `automajick.run` or the `<Ctrl><F1>` Keypress, you will get a quick-s
 - `current_observed_file` : Is the current file you have opened on the editor.
 - **cwd** is set to the *workspace* folder; or if that is not open, the folder of `current_observed_file`
 
-## What is the use of this?
+## What this could be used for
 
 Use cases could include:
 
