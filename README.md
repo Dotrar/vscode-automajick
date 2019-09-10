@@ -26,7 +26,7 @@ We're happy to accept feature requests or comments on how you want it to be used
   "description" : "Some text to help you remember",
   "location?" : "C:/Location/To/Script.py",
   "command?" : "-c \"print('hello world')\"",
-  "forget?" : true;
+  "forget?" : true
 }
 ```
 
@@ -34,7 +34,7 @@ Where:
 
 - `location` is a path to a script that can be run with your chosen interpreter
 - `command` is a line of command line arguements that can be understood by your interpreter (takes precedence over location)
-- `forget` is a boolean signifying a "fire and forget" type of command; you will **preserve** focus in the editor if you set this to true, undefined = false.
+- `forget` is a boolean signifying a "fire and forget" type of command; you will **preserve** focus in the editor if you set this to true, (*undefined means false by default*).
 
 You cannot run both a `command` and a `location`; if both are specified, the `command` will be used.
 
