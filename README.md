@@ -1,6 +1,6 @@
 # Automajick
 
-Auto-(Majick): *A play on 'Automatic' and mispelt form of 'Magic'*.
+Auto-(Majick): _A play on 'Automatic' and mispelt form of 'Magic'_.
 
 A simple way to run scripts through the use of a quickpick dialog box, specified in your vscode settings.
 
@@ -34,10 +34,10 @@ If there's any feature requests, let us know by the way of an issue on the githu
 ```json
 {
   "label": "Script Name",
-  "description" : "Some extra dialog information",
-  "location?" : "C:/path/to/script",
-  "command?" : "-c \"print('hello world')\"",
-  "forget?" : true
+  "description": "Some extra dialog information",
+  "location?": "C:/path/to/script",
+  "command?": "-c \"print('hello world')\"",
+  "forget?": true
 }
 ```
 
@@ -45,14 +45,14 @@ Where:
 
 - `location` is a path to a script that can be run with your chosen interpreter.
 - `command` is a line of command line arguements that can be understood by your interpreter (takes precedence over location)
-- `forget` is a boolean signifying a "fire and forget" type of command; 
+- `forget` is a boolean signifying a "fire and forget" type of command;
   - you will **preserve** focus in the editor if you set this to true; unset is false by default
 
 You cannot run both a `command` and a `location`; if both are specified, the `command` will be used.
 
 ## How to use
 
-Activate via the `<Ctrl><F1>` Keypress or `Automajick Run`, you will get a quick-select popup of different scripts that you have configured to run.
+Activate via the `` <Alt>+` `` Keypress or `Automajick Run`, you will get a quick-select popup of different scripts that you have configured to run.
 
 Each command is ran in the form of:
 
@@ -73,25 +73,26 @@ You can tab-complete the parameter in vscode.settings, which will pre-populate y
 [
   {
     "label": "Hello World",
-    "description" : "This runs a line of python without giving focus to the terminal",
+    "description": "This runs a line of python without giving focus to the terminal",
     "command": "-c \"import sys; print('hello world', sys.argv)\"",
     "forget": true
   },
   {
-    "label" : "Hello File",
-    "description" : "This runs a file somewhere, giving focus to the terminal",
+    "label": "Hello File",
+    "description": "This runs a file somewhere, giving focus to the terminal",
     "location": "C:/test/test.py"
   },
   {
-    "label" : "Hello Null",
-    "description" : "This runs nothing and will pop up as an error box"
+    "label": "Hello Null",
+    "description": "This runs nothing and will pop up as an error box"
   }
 ]
 ```
 
 ## Release Notes
 
-- Version 1.0.1 (this release) - added the `command`, `location`, and `forget` parameters
+- Version 1.0.2 (this release) - changed icon and keybinding, now alt-backtick
+- Version 1.0.1 - added the `command`, `location`, and `forget` parameters
 - Version 1.0.0 - First real release
 
------------------------------------------------------------------------------------------------------------
+---

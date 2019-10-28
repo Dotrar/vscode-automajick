@@ -2,7 +2,7 @@
   "name": "vscode-automajick",
   "displayName": "AutoMajick",
   "description": "Configure and run any scripts from any workspace auto-majickaly",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.37.0"
   },
@@ -26,8 +26,8 @@
   "contributes": {
     "keybindings": [
       {
-        "command": "automajick.run",
-        "key": "Control+F1"
+        "key": "alt+`",
+        "command": "automajick.run"
       }
     ],
     "configuration": {
