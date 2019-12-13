@@ -6,7 +6,7 @@ import * as path from "path";
 
 //const outputChannel = vscode.window.createOutputChannel('Automajick');
 
-interface QuickPickAutoMajickItems extends vscode.QuickPickItem {
+interface QuickPickAutoMajickItem extends vscode.QuickPickItem {
   label: string;
   description: string;
   location?: string;
@@ -15,13 +15,11 @@ interface QuickPickAutoMajickItems extends vscode.QuickPickItem {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-  //this was originally outputChannel but terminals are nicer
-
   const autoTerminal = vscode.window.createTerminal("Automajick");
 
   let disposable = vscode.commands.registerCommand("automajick.run", () => {
 
-    const commands: [QuickPickAutoMajickItems] | null =
+    const commands: [QuickPickAutoMajickItem] | null =
       vscode.workspace.getConfiguration("automajick").get("commands") || null;
 
     if (commands === null) {
@@ -31,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    vscode.window.showQuickPick(commands).then(selection => {
+    vscode.window.showQuickPick(commands).then((selection: QuickPickAutoMajickItem | undefined) => {
       if (selection === undefined) {
         // cancelled command, be quiet
         return;
@@ -87,16 +85,34 @@ export function activate(context: vscode.ExtensionContext) {
         anonymousDirectoryChange = p.dirname(observedFile);
       }
 
-      /* run the interpreter on script given the currentfile in filepath */
-      const target = `${clear}\n ${interp} ${script} "${observedFile}"`;
+      let run = () => {
+        /* run the interpreter on script given the currentfile in filepath */
+        const target = `${clear}\n ${interp} ${script} "${observedFile}"`;
 
-      /* First up, clear the channel, then start */
-      if (anonymousDirectoryChange !== null) {
-        autoTerminal.sendText(`cd "${anonymousDirectoryChange}"\n`);
+        /* First up, clear the channel, then start */
+        if (anonymousDirectoryChange !== null) {
+          autoTerminal.sendText(`cd "${anonymousDirectoryChange}"\n`);
+        }
+
+        autoTerminal.sendText(target);
+        autoTerminal.show(selection.forget || false);
+
+      };
+
+      if (editor.document.isDirty) {
+        /* save the file first so we're not working on an unsaved file */
+        editor.document.save().then((success) => {
+          if (!success) {
+            vscode.window.showErrorMessage("Unable to save file, not running");
+            return;
+          }
+          run();
+        });
+        return;
       }
 
-      autoTerminal.sendText(target);
-      autoTerminal.show( selection.forget || false);
+      /* otherwise, file not dirty, run anyway */
+      run();
     });
   });
 
